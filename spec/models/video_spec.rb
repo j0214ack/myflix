@@ -81,5 +81,19 @@ describe Video do
       expect(search_result_lost).to eq(lost_videos)
       expect(search_result_family).to eq([family_guy])
     end
+
+    it "returns empty array if the search value is an empty string or nil" do
+      lost = Video.create!(title: "Lost", description: "So lost")
+      lost2 = Video.create!(title: "Lost 2", description: "Soooo lost")
+      lost3 = Video.create!(title: "Lost 3", description: "So very lost")
+      family_guy = Video.create!(title: "Family Guy", description: "Hahaha")
+      futurama = Video.create!(title: "Futurama", description: "Woooo")
+
+      search_result_empty = Video.search_by_title("")
+      search_result_nil = Video.search_by_title(nil)
+
+      expect(search_result_empty).to eq([])
+      expect(search_result_nil).to eq([])
+    end
   end
 end
