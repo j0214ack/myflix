@@ -66,19 +66,19 @@ describe Video do
       expect(search_result_lost.size).to eq(3)
     end
 
-    it "finds the correct results" do
+    it "finds the correct results ordered by created_at descending" do
       lost = Video.create!(title: "Lost", description: "So lost")
       lost2 = Video.create!(title: "Lost 2", description: "Soooo lost")
       lost3 = Video.create!(title: "Lost 3", description: "So very lost")
       family_guy = Video.create!(title: "Family Guy", description: "Hahaha")
       futurama = Video.create!(title: "Futurama", description: "Woooo")
 
-      lost_videos = [lost,lost2,lost3]
+      lost_videos = [lost,lost2,lost3].sort_by { |v| v.created_at }.reverse
 
       search_result_lost = Video.search_by_title("lost")
       search_result_family = Video.search_by_title("family")
 
-      expect(search_result_lost.sort_by { |video| video.title }).to eq(lost_videos)
+      expect(search_result_lost).to eq(lost_videos)
       expect(search_result_family).to eq([family_guy])
     end
   end
