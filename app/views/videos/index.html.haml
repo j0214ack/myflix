@@ -6,4 +6,13 @@
       - category.videos.each do |video|
         .video.col-sm-2
           = link_to video do
-            %img(src="#{video.small_cover_url}")
+            = image_tag video.small_cover_url
+- if @videos_without_categories.any?
+  %article.video_category
+    %header
+      %h3= link_to "Uncategorized"
+    .videos.row
+      - @videos_without_categories.each do |video|
+        .video.col-sm-2
+          = link_to video do
+            = image_tag video.small_cover_url
