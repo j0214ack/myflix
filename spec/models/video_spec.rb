@@ -25,6 +25,18 @@ describe Video do
       Video.create!(title: "Family Guy", description: "Hahaha")
       Video.create!(title: "Futurama", description: "Woooo")
 
+      search_result = Video.search_by_title("Family Guy")
+
+      expect(search_result.size).to eq(1)
+    end
+
+    it "finds video that has a partially matched title" do
+      Video.create!(title: "Lost", description: "So lost")
+      Video.create!(title: "Lost 2", description: "Soooo lost")
+      Video.create!(title: "Lost 3", description: "So very lost")
+      Video.create!(title: "Family Guy", description: "Hahaha")
+      Video.create!(title: "Futurama", description: "Woooo")
+
       search_result = Video.search_by_title("Family")
 
       expect(search_result.size).to eq(1)
@@ -49,9 +61,9 @@ describe Video do
       Video.create!(title: "Family Guy", description: "Hahaha")
       Video.create!(title: "Futurama", description: "Woooo")
 
-      search_result = Video.search_by_title("lost")
+      search_result_lost = Video.search_by_title("lOst")
 
-      expect(search_result.size).to eq(3)
+      expect(search_result_lost.size).to eq(3)
     end
 
     it "finds the correct results" do
@@ -67,7 +79,7 @@ describe Video do
       search_result_family = Video.search_by_title("family")
 
       expect(search_result_lost.sort_by { |video| video.title }).to eq(lost_videos)
-      expect(search_result_family).to eq([family])
+      expect(search_result_family).to eq([family_guy])
     end
   end
 end

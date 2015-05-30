@@ -6,7 +6,8 @@ class Video < ActiveRecord::Base
 
   scope :without_category, -> { where(category_id: nil) }
 
-  def self.search_by_title
-    #code
+  def self.search_by_title(search_value)
+    wild_card_search = "%#{search_value.downcase}%"
+    Video.where("lower(title) LIKE ?", wild_card_search)
   end
 end
