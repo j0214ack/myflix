@@ -6,9 +6,9 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
       self.class_eval %Q{
         def #{method_name}(method, options = \{\})
           col_sm_num = options.delete(:col_sm)
-          the_#{method_name} = super(method, bootstrap_options(method, options))
+          the_field = super(method, bootstrap_options(options))
           @template.content_tag :div, class: ["col-sm-\#\{col_sm_num\}"] do
-            the_#{method_name} + field_errors(method)
+            the_field + field_errors(method)
           end
         end
       }
@@ -57,7 +57,7 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
 
   private
 
-  def bootstrap_options(method, options = {})
+  def bootstrap_options(options = {})
     options.merge!(class: "form-control")
     objectify_options(options)
   end
