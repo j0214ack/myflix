@@ -1,0 +1,34 @@
+= form_for(@user, html: { class: "form-horizontal" }) do |f|
+  %header
+    %h1= header
+  %fieldset
+    .form-group{class: ("has-error" unless @user.errors[:email].empty?)}
+      = f.label(:email, "Email Address", class: "control-label col-sm-2")
+      .col-sm-6
+        = f.email_field(:email, class: "form-control")
+        - @user.errors[:email].each do |error_msg|
+          %span.help-block
+            = error_msg
+    .form-group{ class: @user.errors[:password] && "has-error"}
+      = f.label(:password, "Password", class: "control-label col-sm-2")
+      .col-sm-6
+        = f.password_field(:password, class: "form-control")
+        - @user.errors[:password].each do |error_msg|
+          %span.help-block
+            = error_msg
+    .form-group{ class: @user.errors[:password_confirmation] && "has-error" }
+      = f.label(:password_confirmation, "Confirm Password", class: "control-label col-sm-2")
+      .col-sm-6
+        = f.password_field(:password_confirmation, class: "form-control")
+        - @user.errors[:password_confirmation].each do |error_msg|
+          %span.help-block
+            = error_msg
+    .form-group{ class: @user.errors[:full_name] && "has-error"}
+      = f.label(:full_name, "Full Name", class: "control-label col-sm-2")
+      .col-sm-6
+        = f.text_field(:full_name, class: "form-control")
+        - @user.errors[:full_name].each do |error_msg|
+          %span.help-block
+            = error_msg
+    %fieldset.actions.control-group.col-sm-offset-2
+      = f.button("Sign Up", class: "btn btn-default")
