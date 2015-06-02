@@ -6,9 +6,10 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
       self.class_eval %Q{
         def #{method_name}(method, options = \{\})
           col_sm_num = options.delete(:col_sm)
-          the_field = super(method, bootstrap_options(options))
+          content = super(method, bootstrap_options(options))
+          content += field_errors(method) if object.errors[method].any?
           @template.content_tag :div, class: ["col-sm-\#\{col_sm_num\}"] do
-            the_field + field_errors(method)
+            content
           end
         end
       }
@@ -63,12 +64,10 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   def field_errors(method)
-    if object.errors.any?
-      error_msgs = object.errors[method].map do |err_msg|
-        @template.content_tag(:span, class: "help-block") do
-           err_msg
-        end
-      end.join.html_safe
-    end
+    object.errors[method].map do |err_msg|
+      @template.content_tag(:span, class: "help-block") do
+         err_msg
+      end
+    end.join.html_safe
   end
 end
