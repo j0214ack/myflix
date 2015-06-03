@@ -1,6 +1,10 @@
 class SessionsController < ApplicationController
 
-  before_action require_user only: [:destroy]
+  before_action :require_user, only: [:destroy]
+
+  def new
+    redirect_to home_path if logged_in?
+  end
 
   def create
     user = User.find_by_email(params[:email])
@@ -14,13 +18,8 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    if logged_in?
-      session[:user_id] = nil
-      flash[:info] = "Signed out."
-      redirect_to root_path
-    else
-      flash[:success] = "You haven't logged in."
-      redirect_to :back
-    end
+    session[:user_id] = nil
+    flash[:info] = "Signed out."
+    redirect_to root_path
   end
 end
