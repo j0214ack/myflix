@@ -31,31 +31,7 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
     options.merge!(class: ["col-sm-#{col_sm_num}", "control-label"])
     super(method, text, objectify_options(options), &block)
   end
-
-  # def email_field(method, options = {})
-  #   col_sm_num = options.delete(:col_sm)
-  #   the_email_field = super(method, bootstrap_options(method, options))
-  #   @template.content_tag :div, class: ["col-sm-#{col_sm_num}"] do
-  #     the_email_field + field_errors(method)
-  #   end
-  # end
-  #
-  # def password_field(method, options = {})
-  #   col_sm_num = options.delete(:col_sm)
-  #   the_password_field = super(method, bootstrap_options(method, options))
-  #   @template.content_tag :div, class: ["col-sm-#{col_sm_num}"] do
-  #     the_password_field + field_errors(method)
-  #   end
-  # end
-
-  # def text_field(method, options = {})
-  #   col_sm_num = options.delete(:col_sm)
-  #   the_text_field = super(method, bootstrap_options(method, options))
-  #   @template.content_tag :div, class: ["col-sm-#{col_sm_num}"] do
-  #     the_text_field + field_errors(method)
-  #   end
-  # end
-
+  
   private
 
   def bootstrap_options(options = {})
