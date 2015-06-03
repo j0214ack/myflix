@@ -1,10 +1,12 @@
 class SessionsController < ApplicationController
 
+  before_action require_user only: [:destroy]
+
   def create
     user = User.find_by_email(params[:email])
     if user && user.authenticate(params[:password])
       session[:user_id] = user.id
-      redirect_to root_path
+      redirect_to home_path
     else
       flash[:error] = "Something wrong."
       render :new
