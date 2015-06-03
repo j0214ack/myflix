@@ -1,4 +1,7 @@
 class VideosController < ApplicationController
+
+  before_action :require_user
+
   def index
     @categories = Category.all
     @videos_without_categories = Video.without_category
