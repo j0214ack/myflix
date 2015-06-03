@@ -1,0 +1,14 @@
+- unless logged_in?
+  %section.site_title
+    %h1
+      Unlimited Movies for Only 9.99 a Month.
+      = link_to "Sign Up Now!", register_path
+    %p.sign_up
+    %p.sign_in
+      Have an account? Please
+      = link_to "Sign In", sign_in_path
+- else
+  %section.site_title
+    %h1= "Hi, #{current_user.full_name}"
+    %p.sign_in
+      = link_to "Sign Out", sign_out_path

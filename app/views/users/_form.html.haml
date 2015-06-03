@@ -1,0 +1,21 @@
+= bootstrap_form_for(@user, html: { class: "form-horizontal" }) do |f|
+  %header
+    %h1= header
+  %fieldset
+    = f.group(:email) do
+      = f.label(:email, "Email Address", col_sm: 2)
+      = f.email_field(:email, col_sm: 6)
+
+    = f.group(:password) do
+      = f.label(:password, "Password", col_sm: 2)
+      = f.password_field(:password, col_sm: 6)
+
+    = f.group(:password_confirmation) do
+      = f.label(:password_confirmation, "Confirm Password", col_sm: 2)
+      = f.password_field(:password_confirmation, col_sm: 6)
+
+    = f.group(:full_name) do
+      = f.label(:full_name, "Full Name", col_sm: 2)
+      = f.text_field(:full_name, col_sm: 6)
+    %fieldset.actions.control-group.col-sm-offset-2
+      = f.button("Sign Up", class: "btn btn-default")
