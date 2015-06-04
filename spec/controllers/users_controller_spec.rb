@@ -11,16 +11,7 @@ describe UsersController do
 
   describe "POST create" do
     context "when provided with valid parameters" do
-      let(:user_param) do
-        {
-          user: {
-            email: Faker::Internet.email,
-            password: "password",
-            password_confirmation: "password",
-            full_name: Faker::Name.name
-          }
-        }
-      end
+      let(:user_param) { { user: Fabricate.attributes_for(:user) } }
 
       it "redirects to root path" do
         post :create, user_param
