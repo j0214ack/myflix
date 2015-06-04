@@ -11,14 +11,34 @@ describe UsersController do
 
   describe "POST create" do
     context "when provided with valid parameters" do
+      let(:user_param) do
+        {
+          user: {
+            email: Faker::Internet.email,
+            password: "password",
+            password_confirmation: "password",
+            full_name: Faker::Name.name
+          }
+        }
+      end
+
       it "redirects to root path" do
-        post :create, user: {
-                        email: Faker::Internet.email,
-                        password: "password",
-                        password_confirmation: "password",
-                        full_name: Faker::Name.name
-                      }
+        post :create, user_param
         expect(response).to redirect_to root_path
+      end
+
+      it "creates the user record" do
+        post :create, user_param
+
+        user = User.find_by(email: user_param[:user][:email])
+        expect(user).to be
+      end
+
+      it "signs in the user" do
+        post :create, user_param
+
+        user = User.find_by(email: user_param[:user][:email])
+        expect(session[:user_id]).to eq(user.id)
       end
     end
 
