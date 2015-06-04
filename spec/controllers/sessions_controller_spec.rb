@@ -77,11 +77,11 @@ describe SessionsController do
     end
   end
 
-  describe "DELETE destroy" do
+  describe "GET destroy" do
     context "when user is signed in" do
       before(:each) do
         login_user
-        delete :destroy
+        get :destroy
       end
 
       it "session[:user_id] is set to nil" do
@@ -98,7 +98,7 @@ describe SessionsController do
     end
 
     context "when user is not signed in" do
-      before(:each) { delete :destroy }
+      before(:each) { get :destroy }
       it "redirects to root_path" do
         expect(response).to redirect_to root_path
       end
