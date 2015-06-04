@@ -1,0 +1,32 @@
+require 'spec_helper'
+
+describe UsersController do
+  describe "GET new" do
+    it "sets a new @user variable" do
+      get :new
+      expect(assigns(:user)).to be_new_record
+      expect(assigns(:user)).to be_instance_of(User)
+    end
+  end
+
+  describe "POST create" do
+    context "when provided with valid parameters" do
+      it "redirects to root path" do
+        post :create, user: {
+                        email: Faker::Internet.email,
+                        password: "password",
+                        password_confirmation: "password",
+                        full_name: Faker::Name.name
+                      }
+        expect(response).to redirect_to root_path
+      end
+    end
+
+    context "when provided with invalid parameters" do
+      it "renders new template" do
+        post :create, user: { email: "" }
+        expect(response).to render_template :new
+      end
+    end
+  end
+end

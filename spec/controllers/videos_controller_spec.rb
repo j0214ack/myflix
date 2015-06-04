@@ -1,9 +1,5 @@
 require 'spec_helper'
 
-def login_user
-  session[:user_id] = Fabricate(:user).id
-end
-
 describe VideosController do
   describe "GET show" do
     it "sets @video variable when user is authenticated" do
