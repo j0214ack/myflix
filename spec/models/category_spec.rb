@@ -3,31 +3,32 @@ require 'spec_helper'
 describe Category do
   it { should have_many :videos }
 
-  describe "#recent_videos" do
-    it "shows 6 most recent videos ordered by created_at descending order" do
-      category = Category.create!(name: "Recent")
-      videos = []
-      videos << Video.create!(title: "Lost", description: "So lost", category: category)
-      videos << Video.create!(title: "Lost 2", description: "Soooo lost", category: category)
-      videos << Video.create!(title: "Lost 3", description: "So very lost", category: category)
-      videos << Video.create!(title: "Family Guy", description: "Hahaha", category: category)
-      videos << Video.create!(title: "Futurama", description: "Woooo", category: category)
-      videos << Video.create!(title: "Monk", description: "Monk", category: category)
-      videos << Video.create!(title: "Monk 2", description: "Monk 2", category: category)
-      videos << Video.create!(title: "South Park", description: "South Park", category: category)
 
-      expect(category.recent_videos).to eq(videos.reverse[0..5])
+  let(:category) { Fabricate(:category) }
+  describe "#recent_videos" do
+    let(:subject) { category.recent_videos }
+    it "shows no videos when there is no videos" do
+      expect(subject).to eq([])
     end
 
-    it "shows all videos if there is less than 6 videos" do
-      category = Category.create!(name: "Recent")
-      videos = []
-      videos << Video.create!(title: "Lost", description: "So lost", category: category)
-      videos << Video.create!(title: "Lost 3", description: "So very lost", category: category)
-      videos << Video.create!(title: "Family Guy", description: "Hahaha", category: category)
-      videos << Video.create!(title: "Monk", description: "Monk", category: category)
+    it "shows one video when there is only one video" do
+      video = Fabricate(:video, category: category)
+      expect(subject).to eq([video])
+    end
 
-      expect(category.recent_videos).to eq(videos.reverse)
+
+    it "shows all videos if there is less than 6 videos" do
+      videos = Fabricate.times(4, :video, category: category)
+                        .sort_by(&:created_at).reverse
+
+      expect(subject).to eq(videos)
+    end
+
+    it "shows 6 most recent videos ordered by created_at descending order" do
+      videos = Fabricate.times(7, :video, category: category)
+                        .sort_by(&:created_at).reverse
+
+      expect(subject).to eq(videos[0..5])
     end
   end
 
