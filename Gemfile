@@ -11,6 +11,7 @@ gem 'jquery-rails'
 gem 'pg'
 gem 'bcrypt'
 
+
 group :development do
   gem 'thin'
   gem "better_errors"
@@ -21,6 +22,8 @@ group :development, :test do
   gem 'pry'
   gem 'pry-nav'
   gem 'rspec-rails', '2.99'
+  gem 'fabrication'
+  gem 'faker'
 end
 
 group :test do

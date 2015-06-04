@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 def login_user
-  user = User.find_by(email: "a@example.com")
+  # user = User.find_by(email: "a@example.com")
   user ||= User.create(email: "a@example.com", password: "abc", full_name: "CY C")
   request.session[:user_id] = user.id
 end
