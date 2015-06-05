@@ -1,8 +1,9 @@
 require 'spec_helper'
 
 describe Category do
-  it { should have_many :videos }
-
+  it { is_expected.to have_many :videos }
+  it { is_expected.to validate_presence_of :name }
+  it { is_expected.to validate_uniqueness_of :name }
 
   let(:category) { Fabricate(:category) }
   describe "#recent_videos" do
@@ -15,7 +16,6 @@ describe Category do
       video = Fabricate(:video, category: category)
       expect(subject).to eq([video])
     end
-
 
     it "shows all videos if there is less than 6 videos" do
       videos = Fabricate.times(4, :video, category: category)
@@ -31,6 +31,5 @@ describe Category do
       expect(subject).to eq(videos[0..5])
     end
   end
-
 
 end

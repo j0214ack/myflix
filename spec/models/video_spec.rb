@@ -5,6 +5,7 @@ describe Video do
   it { is_expected.to belong_to :category }
   it { is_expected.to validate_presence_of :title }
   it { is_expected.to validate_presence_of :description }
+  it { is_expected.to have_many :reviews }
 
   describe ".search_by_title" do
     let!(:videos) do
@@ -42,6 +43,15 @@ describe Video do
 
     it "returns empty array if the search value is nil" do
       expect(subject.call(nil)).to eq([])
+    end
+  end
+
+  describe '#reviews' do
+    it 'sorts reviews from newest to oldest' do
+      video = Fabricate(:video)
+      reviews = Fabricate.times(3,:review, video: video)
+
+      expect(video.reviews).to eq(reviews.sort_by(&:created_at).reverse)
     end
   end
 end
