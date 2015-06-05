@@ -16,7 +16,16 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
-  bootstrap_field :text_field, :email_field, :password_field
+  bootstrap_field :text_field, :email_field, :password_field, :text_area
+
+  def select(method, choices = nil, options = {}, html_options = {}, &block)
+    col_sm_num = html_options.delete(:col_sm)
+    content = super(method, choices, options, bootstrap_options(html_options), &block)
+    content += field_errors(method) if object.errors[method].any?
+    @template.content_tag :div, class: "col-sm-#{col_sm_num}" do
+      content
+    end
+  end
 
   def group(attr_sym, &block)
     classes = %w(form-group)
@@ -28,10 +37,10 @@ class MyBootstrapFormBuilder < ActionView::Helpers::FormBuilder
 
   def label(method, text = nil, options = {}, &block)
     col_sm_num = options.delete(:col_sm)
-    options.merge!(class: ["col-sm-#{col_sm_num}", "control-label"])
+    col_sm_num && options.merge!(class: ["col-sm-#{col_sm_num}", "control-label"])
     super(method, text, objectify_options(options), &block)
   end
-  
+
   private
 
   def bootstrap_options(options = {})
