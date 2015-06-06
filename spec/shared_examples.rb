@@ -5,7 +5,7 @@ shared_examples 'a video show page' do
   end
 
   it 'sets @reviews variable' do
-    expect(assigns(:reviews)).to eq(reviews.sort_by(&:created_at).reverse)
+    expect(assigns(:reviews)).to match_array(reviews)
   end
 
   it 'sets @review variable' do

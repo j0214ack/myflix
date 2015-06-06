@@ -4,7 +4,6 @@ require 'shared_examples'
 describe ReviewsController do
   describe 'POST create' do
     let(:video) { Fabricate(:video) }
-    let(:reviews) { Fabricate.times(3, :review, video: video) }
     let(:user) { Fabricate(:user) }
     context 'when user signed in' do
       before(:each) do
@@ -20,8 +19,18 @@ describe ReviewsController do
         end
 
         it 'creates the review' do
-          review = user.reviews.where(video: video).first
+          review = Review.first
           expect(review).to be
+        end
+
+        it 'associates the review to the video' do
+          review = Review.first
+          expect(review.video).to eq(video)
+        end
+
+        it 'associates the review to the user' do
+          review = Review.first
+          expect(review.user).to eq(user)
         end
 
         it 'redirects to video page' do
@@ -34,9 +43,11 @@ describe ReviewsController do
       end # context when provided with valid information
 
       context 'when provided with invalid information' do
+        let(:reviews) { video.reviews }
         before(:each) do
           post :create, video_id: video.id, review: { rating: 1, comment: '' }
         end
+
         it_behaves_like 'a video show page'
       end
 
@@ -52,7 +63,6 @@ describe ReviewsController do
         end
 
         it_behaves_like 'a video show page'
-
       end
     end # context when user signed in
 

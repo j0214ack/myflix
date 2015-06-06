@@ -26,7 +26,7 @@
             .row
               = f.text_area(:comment, col_sm: 8, rows: 6)
         %fieldset.form-group.actions.clearfix
-          = f.submit("Submit", class: 'btn')
+          = f.submit('Submit', class: 'btn')
           %a(href = '') Cancel
       %header
         %h3 User #{'Review'.pluralize(@reviews.size)} (#{@reviews.size})
