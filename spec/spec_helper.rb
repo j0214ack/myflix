@@ -60,10 +60,10 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
 end
 
-def login_user
-  session[:user_id] = Fabricate(:user).id
-end
-
-def current_user
-  User.find(session[:user_id])
+def login_user(user = nil)
+  if user.nil?
+    session[:user_id] = Fabricate(:user).id
+  else
+    session[:user_id] = user.id
+  end
 end

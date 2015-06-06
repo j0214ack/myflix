@@ -5,9 +5,10 @@ describe ReviewsController do
   describe 'POST create' do
     let(:video) { Fabricate(:video) }
     let(:reviews) { Fabricate.times(3, :review, video: video) }
+    let(:user) { Fabricate(:user) }
     context 'when user signed in' do
       before(:each) do
-        login_user
+        login_user(user)
       end
 
       context 'when provided with valid information' do
@@ -19,7 +20,7 @@ describe ReviewsController do
         end
 
         it 'creates the review' do
-          review = current_user.reviews.where(video: video).first
+          review = user.reviews.where(video: video).first
           expect(review).to be
         end
 
@@ -37,6 +38,21 @@ describe ReviewsController do
           post :create, video_id: video.id, review: { rating: 1, comment: '' }
         end
         it_behaves_like 'a video show page'
+      end
+
+      context 'when user already created a review on this video' do
+        let!(:review) { Fabricate(:review, video: video, user: user) }
+        let(:reviews) { video.reviews }
+        let(:info) do
+          Fabricate.attributes_for(:review, video: video, user: user)
+        end
+        before(:each) do
+          login_user(user)
+          post :create, video_id: video.id, review: info
+        end
+
+        it_behaves_like 'a video show page'
+
       end
     end # context when user signed in
 
