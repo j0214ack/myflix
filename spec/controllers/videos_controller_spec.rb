@@ -3,20 +3,20 @@ require 'shared_examples'
 
 describe VideosController do
   describe "GET show" do
-    let(:south_park) { Fabricate(:video, title: "South Park") }
-    let(:reviews) { Fabricate.times(3, :review, video: south_park) }
+    let(:video) { Fabricate(:video, title: "South Park") }
+    let(:reviews) { Fabricate.times(3, :review, video: video) }
 
     context 'when user signed in' do
       before(:each) do
         login_user
-        get :show, id: south_park.id
+        get :show, id: video.id
       end
       it_behaves_like 'a video show page'
     end
 
     context 'when user is not signed in' do
       it 'redirect to root path' do
-        get :show, id: south_park.id
+        get :show, id: video.id
         expect(response).to redirect_to root_path
       end
     end
@@ -33,10 +33,10 @@ describe VideosController do
       end
 
       it "sets @search_results" do
-        south_park = Fabricate(:video, title: "South Park")
+        video = Fabricate(:video, title: "South Park")
         get :search, q: "South Park"
 
-        expect(assigns(:search_results)).to eq([south_park])
+        expect(assigns(:search_results)).to eq([video])
       end
     end
 

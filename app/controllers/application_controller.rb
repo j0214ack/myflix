@@ -17,4 +17,17 @@ class ApplicationController < ActionController::Base
       redirect_to root_path
     end
   end
+
+  private
+
+  def set_reviews(object)
+    @reviews = object.reviews.includes(:user)
+    if @reviews.any?
+      total_rating = @reviews.map(&:rating).inject(&:+).to_f
+      @average_rating = ( total_rating / @reviews.size).round(1)
+    else
+      @average_rating = 0.0
+    end
+    @rating_chioces = Review::RATING_RANGE.map { |n| ["#{n} Stars", n]  }
+  end
 end

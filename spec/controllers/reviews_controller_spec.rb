@@ -1,9 +1,11 @@
 require 'spec_helper'
+require 'shared_examples'
 
 describe ReviewsController do
   describe 'POST create' do
+    let(:video) { Fabricate(:video) }
+    let(:reviews) { Fabricate.times(3, :review, video: video) }
     context 'when user signed in' do
-      let(:video) { Fabricate(:video) }
       before(:each) do
         login_user
       end

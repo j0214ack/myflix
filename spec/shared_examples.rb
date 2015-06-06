@@ -1,7 +1,7 @@
 require 'spec_helper'
 shared_examples 'a video show page' do
   it 'sets @video variable' do
-    expect(assigns(:video)).to eq(south_park)
+    expect(assigns(:video)).to eq(video)
   end
 
   it 'sets @reviews variable' do
