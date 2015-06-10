@@ -61,9 +61,6 @@ RSpec.configure do |config|
 end
 
 def login_user(user = nil)
-  if user.nil?
-    session[:user_id] = Fabricate(:user).id
-  else
-    session[:user_id] = user.id
-  end
+  user ||= Fabricate(:user)
+  session[:user_id] = user.id
 end
