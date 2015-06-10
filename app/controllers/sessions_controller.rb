@@ -20,7 +20,7 @@ class SessionsController < ApplicationController
         session[:user_id] = user.id
         redirect_to home_path
       else
-        flash[:error] = "Something wrong."
+        flash.now[:error] = "Something wrong."
         render :new
       end
     end

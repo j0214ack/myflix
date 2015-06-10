@@ -11,4 +11,11 @@ class Video < ActiveRecord::Base
     return [] if search_value.blank?
     where("lower(title) LIKE ?", "%#{search_value.downcase}%").order("created_at DESC")
   end
+
+  def average_rating
+    if reviews.size > 0
+      total_rating = reviews.map(&:rating).inject(&:+).to_f
+      (total_rating / reviews.size).round(1)
+    end
+  end
 end

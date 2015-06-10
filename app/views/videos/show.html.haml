@@ -6,7 +6,7 @@
       .video_info.col-sm-3
         %header
           %h3= @video.title
-          %span Rating: #{@average_rating}/5.0
+          %span Rating: #{@video.average_rating}/5.0
         %p= @video.description
         .actions
           %a.btn.btn-primary(href = '') Watch Now
@@ -20,7 +20,7 @@
           = f.group(:rating) do
             = f.label(:rating, 'Rate this video')
             .row
-              = f.select(:rating, @rating_chioces, {}, col_sm: 3)
+              = f.select(:rating, rating_chioces, {}, col_sm: 3)
           = f.group(:comment) do
             = f.label(:comment, 'Write Review')
             .row

@@ -28,6 +28,5 @@ class ApplicationController < ActionController::Base
     else
       @average_rating = 0.0
     end
-    @rating_chioces = Review::RATING_RANGE.map { |n| ["#{n} Stars", n]  }
   end
 end

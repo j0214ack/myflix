@@ -3,13 +3,12 @@ class ReviewsController < ApplicationController
 
   def create
     @video = Video.find(params[:video_id])
-    @review = current_user.reviews.build(review_params)
-    @review.video = @video
+    @review = current_user.reviews.build(review_params.merge(video: @video))
     if @review.save
       flash[:success] = 'Review added.'
       redirect_to @video
     else
-      set_reviews(@video)
+      @reviews = @video.reviews
       render 'videos/show'
     end
   end

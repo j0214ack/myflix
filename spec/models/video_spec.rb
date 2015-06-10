@@ -54,4 +54,28 @@ describe Video do
       expect(video.reviews).to eq(reviews.sort_by(&:created_at).reverse)
     end
   end
+
+  describe "#average_rating" do
+    it 'returns nil when there is no reviews' do
+      video = Fabricate(:video)
+
+      expect(video.average_rating).to be_nil
+    end
+
+    it 'returns the review rating when there is only one review' do
+      video = Fabricate(:video)
+      review = Fabricate(:review, video: video)
+
+      expect(video.average_rating).to eq(review.rating)
+    end
+
+    it 'returns the average review rating rounded to 1 when there are multiple reviews' do
+      video = Fabricate(:video)
+      reviews = Fabricate.times(3, :review, video: video)
+      average_rating = reviews.map(&:rating).inject(&:+).to_f / 3
+
+      expect(video.average_rating).to eq(average_rating.round(1))
+    end
+
+  end
 end
