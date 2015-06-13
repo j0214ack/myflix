@@ -19,4 +19,8 @@ class Video < ActiveRecord::Base
       (total_rating / reviews.size).round(1)
     end
   end
+
+  def in_the_queue_of?(user)
+    !!queue_items.find_by(user_id: user.id)
+  end
 end

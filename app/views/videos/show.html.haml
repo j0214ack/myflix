@@ -10,7 +10,14 @@
         %p= @video.description
         .actions
           %a.btn.btn-primary(href = '') Watch Now
-          %a.btn.btn-default(href = '') + My Queue
+          - if @video.in_the_queue_of?(current_user)
+            %button.btn.btn-default
+              %i.glyphicon.glyphicon-ok
+              &nbsp;In My Queue
+          - else
+            = link_to('+ My Queue', queue_items_path(video_id: @video.id),
+                                    method: :post,
+                                    class: 'btn btn-default')
 
 %section.reviews.container
   .row

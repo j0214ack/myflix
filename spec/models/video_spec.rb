@@ -77,6 +77,18 @@ describe Video do
 
       expect(video.average_rating).to eq(average_rating.round(1))
     end
+  end
 
+  describe '#in_the_queue_of?(user)' do
+    let!(:user) { Fabricate(:user) }
+    let!(:video) { Fabricate(:video) }
+    it "returns true if the video is in the user's queue" do
+      Fabricate(:queue_item, video: video, user: user)
+      expect(video.in_the_queue_of?(user)).to be_true
+    end
+
+    it "returns false if the video is not in the user's queue" do
+      expect(video.in_the_queue_of?(user)).to be_false
+    end
   end
 end
