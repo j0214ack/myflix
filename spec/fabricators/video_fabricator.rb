@@ -7,4 +7,5 @@ Fabricator(:video) do
   large_cover_url do
     '/tmp/large/' + Dir.entries("#{Rails.public_path}/tmp/large/")[2..-1].sample
   end
+  category
 end
