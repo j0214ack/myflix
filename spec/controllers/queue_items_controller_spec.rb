@@ -77,5 +77,62 @@ describe QueueItemsController do
         expect(response).to redirect_to root_path
       end
     end
-  end
+  end # describe POST create
+
+  describe 'DELETE destroy' do
+    # For redirect_to :back funtionality in controller
+    before(:each) { request.env["HTTP_REFERER"] = "http://test.host" }
+
+    context 'when user not signed in,' do
+      let!(:queue_item) { Fabricate(:queue_item) }
+      it 'redirects to root path' do
+        delete :destroy, id: queue_item.id
+        expect(response).to redirect_to root_path
+      end
+      it 'sets flash[:error]' do
+        delete :destroy, id: queue_item.id
+        expect(flash[:error]).to be_present
+      end
+    end
+
+    context 'when user signed in,' do
+      let(:user) { Fabricate(:user) }
+      before(:each) { login_user(user) }
+
+      context 'when the queue item belongs to the user,' do
+        let!(:queue_item) { Fabricate(:queue_item, user: user) }
+
+        it 'deletes the queue item' do
+          expect {
+            delete :destroy, id: queue_item.id
+          }.to change{QueueItem.count}.by(-1)
+        end
+
+        it 'redirects to the previous path' do
+          delete :destroy, id: queue_item.id
+          expect(response).to redirect_to :back
+        end
+      end
+
+      context "when the queue item doesn't belongs to the user" do
+        let!(:queue_item) { Fabricate(:queue_item) }
+
+        it "doesn't delete the queue item" do
+          expect {
+            delete :destroy, id: queue_item.id
+          }.not_to change{QueueItem.count}
+        end
+
+        it 'redirects to the previous path' do
+          delete :destroy, id: queue_item.id
+          expect(response).to redirect_to :back
+        end
+
+        it 'sets flash[:error]' do
+          delete :destroy, id: queue_item.id
+          expect(flash[:error]).to be_present
+        end
+      end
+    end # context when user signed in
+  end # describe DELETE destroy
 end

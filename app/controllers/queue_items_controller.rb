@@ -13,4 +13,14 @@ class QueueItemsController < ApplicationController
     end
     redirect_to video
   end
+
+  def destroy
+    queue_item = QueueItem.find(params[:id])
+    if queue_item.user == current_user
+      queue_item.destroy
+    else
+      flash[:error] = "You can't do that."
+    end
+    redirect_to :back
+  end
 end

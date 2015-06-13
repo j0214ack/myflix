@@ -20,7 +20,7 @@ class Video < ActiveRecord::Base
     end
   end
 
-  def in_the_queue_of?(user)
-    !!queue_items.find_by(user_id: user.id)
+  def queue_item_of(user)
+    queue_items.find_by(user_id: user.id)
   end
 end

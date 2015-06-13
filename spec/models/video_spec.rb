@@ -79,16 +79,20 @@ describe Video do
     end
   end
 
-  describe '#in_the_queue_of?(user)' do
+  describe '#queue_item_of(user)' do
     let!(:user) { Fabricate(:user) }
     let!(:video) { Fabricate(:video) }
-    it "returns true if the video is in the user's queue" do
-      Fabricate(:queue_item, video: video, user: user)
-      expect(video.in_the_queue_of?(user)).to be_true
+    context 'the user has the video in the queue' do
+      let!(:queue_item) { Fabricate(:queue_item, video: video, user: user) }
+      it "returns the queue_item" do
+        expect(video.queue_item_of(user)).to eq queue_item
+      end
     end
 
-    it "returns false if the video is not in the user's queue" do
-      expect(video.in_the_queue_of?(user)).to be_false
+    context "the user doesn't have the video in the queue" do
+      it "returns nil" do
+        expect(video.queue_item_of(user)).to be_nil
+      end
     end
   end
 end
