@@ -1,7 +1,6 @@
 class QueueItem < ActiveRecord::Base
   belongs_to :user
   belongs_to :video
-  validates_uniqueness_of :position, scope: :user_id
   before_validation :set_position, unless: :has_position?
 
   delegate :category, to: :video

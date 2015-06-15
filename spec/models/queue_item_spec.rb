@@ -3,7 +3,6 @@ require 'spec_helper'
 describe QueueItem do
   it { is_expected.to belong_to :user }
   it { is_expected.to belong_to :video }
-  it { is_expected.to validate_uniqueness_of(:position).scoped_to(:user_id)}
   it { is_expected.to callback(:set_position).before(:validation).unless(:has_position?) }
 
   describe '#set_position' do
