@@ -137,7 +137,11 @@ describe QueueItemsController do
   end # describe DELETE destroy
   describe 'PUT batch_update' do
     context 'when user not signed in' do
-      it 'redirects to root path'
+      it 'redirects to root path' do
+        put 'batch_update', queue_item: {}
+
+        expect(response).to redirect_to root_path
+      end
     end
 
     context 'when user signed in' do
@@ -145,25 +149,61 @@ describe QueueItemsController do
       before { login_user(user) }
       context 'when all the position parameters are valid, ' do
         it 'updates the position of each queue item' do
-          video = Fabricate(:video)
-          queue_item1 = Fabricate(:queue_item, user: user, video: video)
-          queue_item2 = Fabricate(:queue_item, user: user, video: video)
+          queue_item1 = Fabricate(:queue_item, user: user)
+          queue_item2 = Fabricate(:queue_item, user: user)
 
           put 'batch_update', queue_item: {
                                 "#{queue_item1.id}" => { position: "2", rating: "" },
                                 "#{queue_item2.id}" => { position: "1", rating: "" }
                               }
 
-          expect([queue_item1.position, queue_item2.position]).to eq [2,1]
+          expect([queue_item1.reload.position, queue_item2.reload.position]).to eq [2,1]
         end
+
+        it 'keeps the user input order but sets the minimun values of position' do
+          queue_item1 = Fabricate(:queue_item, user: user)
+          queue_item2 = Fabricate(:queue_item, user: user)
+
+          put 'batch_update', queue_item: {
+                                "#{queue_item1.id}" => { position: "9", rating: "" },
+                                "#{queue_item2.id}" => { position: "3", rating: "" }
+                              }
+
+          expect([queue_item1.reload.position, queue_item2.reload.position]).to eq [2,1]
+        end
+
         it 'redirects to my queue path' do
-          put 'batch_update'
+          put 'batch_update', queue_item: {}
           expect(response).to redirect_to my_queue_path
         end
       end
 
       context 'when at least one of the position parameters is invalid' do
-        it 'does not update queue items at all'
+        it 'does not update queue items at all' do
+          queue_items = Fabricate.times(3, :queue_item, user: user)
+
+          put 'batch_update', queue_item: {
+                                "#{queue_items[0].id}" => { position: "2", rating: "" },
+                                "#{queue_items[1].id}" => { position: "1", rating: "" },
+                                "#{queue_items[2].id}" => { position: "2", rating: "" }
+                              }
+
+          updated_positions = queue_items.each(&:reload).map(&:position)
+
+          expect(updated_positions).to eq [1,2,3]
+        end
+
+        it 'sets flash[:error]' do
+          queue_items = Fabricate.times(3, :queue_item, user: user)
+
+          put 'batch_update', queue_item: {
+                                "#{queue_items[0].id}" => { position: "2", rating: "" },
+                                "#{queue_items[1].id}" => { position: "1", rating: "" },
+                                "#{queue_items[2].id}" => { position: "2", rating: "" }
+                              }
+
+          expect(flash[:error]).to be_present
+        end
       end
     end
   end # describe PUT batch_update

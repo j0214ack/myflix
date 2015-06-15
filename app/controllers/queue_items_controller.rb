@@ -25,5 +25,20 @@ class QueueItemsController < ApplicationController
   end
 
   def batch_update
+    unless params[:queue_item].map{|_, value| value[:position]}.uniq!
+      QueueItem.transaction do
+        params[:queue_item]
+          .sort_by { |_, value| value[:position] }.map{ |id, _| id}
+          .each_with_index do |id, index|
+            item = QueueItem.find(id)
+            item.position = index + 1
+            item.save
+          end
+      end
+    else
+      flash[:error] = "There were duplications in your positions"
+    end
+
+    redirect_to my_queue_path
   end
 end
