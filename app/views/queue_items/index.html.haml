@@ -4,7 +4,7 @@
       %article
         %header
           %h2 My Queue
-        = form_tag do
+        = form_tag update_my_queue_path, method: :put do
           %table.table
             %thead
               %tr
@@ -29,4 +29,4 @@
                   %td
                     = link_to queue_item, method: :delete do
                       %i.glyphicon.glyphicon-remove
-          = button_to 'Update Instant Queue', nil, class: 'btn btn-default'
+          = button_tag 'Update Instant Queue', class: 'btn btn-default'

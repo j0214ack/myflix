@@ -135,4 +135,36 @@ describe QueueItemsController do
       end
     end # context when user signed in
   end # describe DELETE destroy
+  describe 'PUT batch_update' do
+    context 'when user not signed in' do
+      it 'redirects to root path'
+    end
+
+    context 'when user signed in' do
+      let(:user) { Fabricate(:user) }
+      before { login_user(user) }
+      context 'when all the position parameters are valid, ' do
+        it 'updates the position of each queue item' do
+          video = Fabricate(:video)
+          queue_item1 = Fabricate(:queue_item, user: user, video: video)
+          queue_item2 = Fabricate(:queue_item, user: user, video: video)
+
+          put 'batch_update', queue_item: {
+                                "#{queue_item1.id}" => { position: "2", rating: "" },
+                                "#{queue_item2.id}" => { position: "1", rating: "" }
+                              }
+
+          expect([queue_item1.position, queue_item2.position]).to eq [2,1]
+        end
+        it 'redirects to my queue path' do
+          put 'batch_update'
+          expect(response).to redirect_to my_queue_path
+        end
+      end
+
+      context 'when at least one of the position parameters is invalid' do
+        it 'does not update queue items at all'
+      end
+    end
+  end # describe PUT batch_update
 end

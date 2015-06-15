@@ -23,4 +23,7 @@ class QueueItemsController < ApplicationController
     end
     redirect_to :back
   end
+
+  def batch_update
+  end
 end
