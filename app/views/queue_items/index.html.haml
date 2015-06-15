@@ -15,10 +15,10 @@
                 %th(width="15%") Genre
                 %th(width="15%") Remove
             %tbody
-              - @queue_items.each_with_index do |queue_item, index|
+              - @queue_items.each do |queue_item|
                 %tr
                   %td= text_field_tag("queue_item[#{queue_item.id}][position]",
-                                      index + 1, class: 'form-control')
+                                      queue_item.position, class: 'form-control')
                   %td= link_to queue_item.video.title, queue_item.video
                   %td= button_to 'Play', nil, class: 'btn btn-default'
                   %td= select_tag("queue_item[#{queue_item.id}][rating]",
