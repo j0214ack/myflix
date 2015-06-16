@@ -84,7 +84,7 @@ describe QueueItemsController do
     before(:each) { request.env["HTTP_REFERER"] = "http://test.host" }
 
     context 'when user not signed in,' do
-      let!(:queue_item) { Fabricate(:queue_item) }
+      let(:queue_item) { Fabricate(:queue_item) }
       it 'redirects to root path' do
         delete :destroy, id: queue_item.id
         expect(response).to redirect_to root_path
@@ -112,6 +112,15 @@ describe QueueItemsController do
           delete :destroy, id: queue_item.id
           expect(response).to redirect_to :back
         end
+
+        it "normalizes the queue items' position" do
+          user2 = Fabricate(:user)
+          login_user(user2)
+          queue_items = Fabricate.times(3, :queue_item, user: user2)
+          delete :destroy, id: queue_items[1].id
+
+          expect(user2.queue_items.map(&:position)).to eq [1,2]
+        end
       end
 
       context "when the queue item doesn't belongs to the user" do
@@ -135,10 +144,11 @@ describe QueueItemsController do
       end
     end # context when user signed in
   end # describe DELETE destroy
+
   describe 'PUT batch_update' do
     context 'when user not signed in' do
       it 'redirects to root path' do
-        put 'batch_update', queue_item: {}
+        put 'batch_update', queue_items: []
 
         expect(response).to redirect_to root_path
       end
@@ -152,59 +162,117 @@ describe QueueItemsController do
           queue_item1 = Fabricate(:queue_item, user: user)
           queue_item2 = Fabricate(:queue_item, user: user)
 
-          put 'batch_update', queue_item: {
-                                "#{queue_item1.id}" => { position: "2", rating: "" },
-                                "#{queue_item2.id}" => { position: "1", rating: "" }
-                              }
+          put 'batch_update', queue_items: [
+                                {id: queue_item1.id, position: 2},
+                                {id: queue_item2.id, position: 1}
+                              ]
 
-          expect([queue_item1.reload.position, queue_item2.reload.position]).to eq [2,1]
+          updated_positions = [ queue_item1.reload.position,
+                                queue_item2.reload.position ]
+
+          expect(updated_positions).to eq [2,1]
         end
 
-        it 'keeps the user input order but sets the minimun values of position' do
+        it 'normalizes the positions' do
           queue_item1 = Fabricate(:queue_item, user: user)
           queue_item2 = Fabricate(:queue_item, user: user)
 
-          put 'batch_update', queue_item: {
-                                "#{queue_item1.id}" => { position: "9", rating: "" },
-                                "#{queue_item2.id}" => { position: "3", rating: "" }
-                              }
+          put 'batch_update', queue_items: [
+                                { id: queue_item1.id, position: 9},
+                                { id: queue_item2.id, position: 3}
+                              ]
+          updated_positions = [ queue_item1.reload.position,
+                                queue_item2.reload.position ]
 
-          expect([queue_item1.reload.position, queue_item2.reload.position]).to eq [2,1]
+          expect(updated_positions).to eq [2,1]
         end
 
         it 'redirects to my queue path' do
-          put 'batch_update', queue_item: {}
+          put 'batch_update', queue_items: []
           expect(response).to redirect_to my_queue_path
         end
       end
 
-      context 'when at least one of the position parameters is invalid' do
+      context 'when some of the position parameters is duplicated' do
         it 'does not update queue items at all' do
           queue_items = Fabricate.times(3, :queue_item, user: user)
 
-          put 'batch_update', queue_item: {
-                                "#{queue_items[0].id}" => { position: "2", rating: "" },
-                                "#{queue_items[1].id}" => { position: "1", rating: "" },
-                                "#{queue_items[2].id}" => { position: "2", rating: "" }
-                              }
+          put 'batch_update', queue_items: [
+                                { id: queue_items[0].id, position: 2 },
+                                { id: queue_items[1].id, position: 1 },
+                                { id: queue_items[2].id, position: 2 }
+                              ]
 
-          updated_positions = queue_items.each(&:reload).map(&:position)
-
-          expect(updated_positions).to eq [1,2,3]
+          expect(user.queue_items).to eq queue_items
         end
 
         it 'sets flash[:error]' do
           queue_items = Fabricate.times(3, :queue_item, user: user)
 
-          put 'batch_update', queue_item: {
-                                "#{queue_items[0].id}" => { position: "2", rating: "" },
-                                "#{queue_items[1].id}" => { position: "1", rating: "" },
-                                "#{queue_items[2].id}" => { position: "2", rating: "" }
-                              }
+          put 'batch_update', queue_items: [
+                                { id: queue_items[0].id, position: 2 },
+                                { id: queue_items[1].id, position: 1 },
+                                { id: queue_items[2].id, position: 2 }
+                              ]
+
+          expect(flash[:error]).to be_present
+        end
+      end # context when at least one of the position parameters is invalid
+
+      context 'when some of the position value is not valid' do
+        it 'does not update queue items at all' do
+          queue_items = Fabricate.times(3, :queue_item, user: user)
+
+          put 'batch_update', queue_items: [
+                                { id: queue_items[0].id, position: 1 },
+                                { id: queue_items[1].id, position: 'wrong' },
+                                { id: queue_items[2].id, position: 3 }
+                              ]
+
+          expect(user.queue_items).to eq queue_items
+        end
+
+        it 'sets flash[:error]' do
+          queue_items = Fabricate.times(3, :queue_item, user: user)
+
+          put 'batch_update', queue_items: [
+                                { id: queue_items[0].id, position: 1 },
+                                { id: queue_items[1].id, position: 'wrong' },
+                                { id: queue_items[2].id, position: 3 }
+                              ]
+
+          expect(flash[:error]).to be_present
+        end
+      end # context when some of the position value is not valid
+
+      context "when tries to update other user's item" do
+        it 'does not update' do
+          other_user = Fabricate(:user)
+          other_items = Fabricate.times(3, :queue_item, user: other_user)
+
+          put 'batch_update', queue_items: [
+                                { id: other_items[0].id, position: 3},
+                                { id: other_items[1].id, position: 2},
+                                { id: other_items[2].id, position: 1},
+                              ]
+
+          expect(other_user.queue_items).to eq(other_items)
+        end
+
+        it 'sets flash[:error]' do
+          other_user = Fabricate(:user)
+          other_items = Fabricate.times(3, :queue_item, user: other_user)
+
+          put 'batch_update', queue_items: [
+                                { id: other_items[0].id, position: 3},
+                                { id: other_items[1].id, position: 2},
+                                { id: other_items[2].id, position: 1},
+                              ]
 
           expect(flash[:error]).to be_present
         end
       end
-    end
+
+    end # context when user signed in
   end # describe PUT batch_update
 end

@@ -16,27 +16,15 @@ class QueueItemsController < ApplicationController
 
   def destroy
     queue_item = QueueItem.find(params[:id])
-    if queue_item.user == current_user
-      queue_item.destroy
-    else
+    unless queue_item.try(:destroy_by_user, current_user)
       flash[:error] = "You can't do that."
     end
     redirect_to :back
   end
 
   def batch_update
-    unless params[:queue_item].map{|_, value| value[:position]}.uniq!
-      QueueItem.transaction do
-        params[:queue_item]
-          .sort_by { |_, value| value[:position] }.map{ |id, _| id}
-          .each_with_index do |id, index|
-            item = QueueItem.find(id)
-            item.position = index + 1
-            item.save
-          end
-      end
-    else
-      flash[:error] = "There were duplications in your positions"
+    unless QueueItem.batch_update_by_user(current_user, params[:queue_items])
+      flash[:error] = "Something wrong."
     end
 
     redirect_to my_queue_path
