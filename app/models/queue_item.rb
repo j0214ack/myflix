@@ -33,8 +33,8 @@ end
 
 class << QueueItem
   def batch_update_by_user(user, queue_items_params)
-    if ( params_are_valid?(user, queue_items_params) &&
-         update_queue_items(queue_items_params))
+    if ( validates_params(user, queue_items_params) &&
+         update_queue_items(queue_items_params) )
       true
     else
       false
@@ -65,45 +65,58 @@ class << QueueItem
     end
   end
 
-  def params_are_valid?(user, queue_items_params)
-    !duplicate_positions?(queue_items_params)          &&
-    !contain_other_user_item(user, queue_items_params) &&
-    !contain_non_integer(queue_items_params)
+  def validates_params(user, params)
+    ParamsValidator.new(user, params).valid?
   end
 
-  def is_not_int?(input)
-    if input.is_a?(String)
-      !input.match(/^\d+$/)
-    else
-      !input.is_a?(Integer)
+  class ParamsValidator
+    attr_reader :requester, :params
+
+    def initialize(requester, params)
+      @requester = requester
+      @params = params
     end
-  end
 
-  def duplicate_positions?(queue_items_params)
-    !!queue_items_params.map{|item_data| item_data[:position]}.uniq!
-  end
+    def valid?
+      valid_ids? && !duplicate_positions?
+    end
 
-  def valid_ids?(user, queue_items_params)
-    !( contain_other_user_item(user, queue_items_params) ||
-       contain_non_integer(queue_items_params) )
-  end
+    private
 
-  def contain_other_user_item(user, queue_items_params)
-    item_ids = queue_items_params.map{ |item_data| item_data[:id] }
-    result = false
-    item_ids.each do |id|
-      unless user.queue_item_ids.include? id.to_i
-        result = true
-        break
+    def is_not_int?(input)
+      if input.is_a?(String)
+        !input.match(/^\d+$/)
+      else
+        !input.is_a?(Integer)
       end
     end
 
-    result
-  end
+    def duplicate_positions?
+      !!params.map{ |item_data| item_data[:position] }.uniq!
+    end
 
-  def contain_non_integer(queue_items_params)
-    !!queue_items_params
-      .map{ |data| data[:position]}
-      .index{ |position| is_not_int?(position) }
-  end
-end
+    def valid_ids?
+      !contain_other_user_item &&
+      !contain_non_integer
+    end
+
+    def contain_other_user_item
+      item_ids = params.map{ |item_data| item_data[:id] }
+      result = false
+      item_ids.each do |id|
+        unless requester.queue_item_ids.include? id.to_i
+          result = true
+          break
+        end
+      end
+
+      result
+    end
+
+    def contain_non_integer
+      !!params
+        .map{ |data| data[:position]}
+        .index{ |position| is_not_int?(position) }
+    end
+  end # class ParamsValidator
+end # class << QueueItem
