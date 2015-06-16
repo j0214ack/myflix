@@ -20,55 +20,6 @@ class QueueItem < ActiveRecord::Base
     end
   end
 
-  def self.batch_update_by_user(user, queue_items_params)
-    if params_are_valid?(user, queue_items_params)
-      begin
-        transaction do
-          queue_items_params
-            .sort_by { |item_data| item_data[:position] }
-            .each_with_index do |item_data, index|
-              item = find(item_data[:id])
-              item.update_attributes!(position: index + 1)
-            end
-        end
-        true
-      rescue
-        false
-      end
-    else
-      false
-    end
-  end
-
-  def self.params_are_valid?(user, queue_items_params)
-    item_ids = queue_items_params.map{|item_data| item_data[:id]}
-    valid_item_ids = true
-    item_ids.each do |id|
-      valid_item_ids = false unless user.queue_item_ids.include? id.to_i
-    end
-
-    positions = queue_items_params.map{|item_data| item_data[:position]}
-    duplication = !!positions.uniq!
-
-    containing_non_integer = !!positions.index{|position| is_not_int?(position)}
-
-    (!(duplication || containing_non_integer) && valid_item_ids)
-  end
-
-  def self.normalize(user)
-    user.queue_items.each_with_index do |item, index|
-      item.update_attributes(position: index + 1)
-    end
-  end
-
-  def self.is_not_int?(input)
-    if input.is_a?(String)
-      !input.match(/^\d+$/)
-    else
-      !input.is_a?(Integer)
-    end
-  end
-
   private
 
   def set_position
@@ -77,5 +28,82 @@ class QueueItem < ActiveRecord::Base
 
   def has_position?
     !!self.position
+  end
+end
+
+class << QueueItem
+  def batch_update_by_user(user, queue_items_params)
+    if ( params_are_valid?(user, queue_items_params) &&
+         update_queue_items(queue_items_params))
+      true
+    else
+      false
+    end
+  end
+
+  def normalize(user)
+    user.queue_items.each_with_index do |item, index|
+      item.update_attributes(position: index + 1)
+    end
+  end
+
+  private
+
+  def update_queue_items(queue_items_params)
+    begin
+      transaction do
+        queue_items_params
+          .sort_by { |item_data| item_data[:position] }
+          .each_with_index do |item_data, index|
+            item = find(item_data[:id])
+            item.update_attributes!(position: index + 1)
+          end
+      end
+      true
+    rescue
+      false
+    end
+  end
+
+  def params_are_valid?(user, queue_items_params)
+    !duplicate_positions?(queue_items_params)          &&
+    !contain_other_user_item(user, queue_items_params) &&
+    !contain_non_integer(queue_items_params)
+  end
+
+  def is_not_int?(input)
+    if input.is_a?(String)
+      !input.match(/^\d+$/)
+    else
+      !input.is_a?(Integer)
+    end
+  end
+
+  def duplicate_positions?(queue_items_params)
+    !!queue_items_params.map{|item_data| item_data[:position]}.uniq!
+  end
+
+  def valid_ids?(user, queue_items_params)
+    !( contain_other_user_item(user, queue_items_params) ||
+       contain_non_integer(queue_items_params) )
+  end
+
+  def contain_other_user_item(user, queue_items_params)
+    item_ids = queue_items_params.map{ |item_data| item_data[:id] }
+    result = false
+    item_ids.each do |id|
+      unless user.queue_item_ids.include? id.to_i
+        result = true
+        break
+      end
+    end
+
+    result
+  end
+
+  def contain_non_integer(queue_items_params)
+    !!queue_items_params
+      .map{ |data| data[:position]}
+      .index{ |position| is_not_int?(position) }
   end
 end
