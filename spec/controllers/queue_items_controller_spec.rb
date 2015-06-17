@@ -157,7 +157,28 @@ describe QueueItemsController do
     context 'when user signed in' do
       let(:user) { Fabricate(:user) }
       before { login_user(user) }
-      context 'when all the position parameters are valid, ' do
+      context 'when all the parameters are valid, ' do
+        it 'updates item video review rating when review exists' do
+          video = Fabricate(:video)
+          review = Fabricate(:review, user: user, video: video, rating: 5)
+          queue_item1 = Fabricate(:queue_item, user: user, video: video)
+
+          put 'batch_update',
+            queue_items: [ { id: queue_item1.id, position: 1, rating: 1 } ]
+
+          expect(review.reload.rating).to eq 1
+        end
+
+        it 'creates a new review for the video when there were no reviews' do
+          video = Fabricate(:video)
+          queue_item1 = Fabricate(:queue_item, user: user, video: video)
+
+          put 'batch_update',
+            queue_items: [ { id: queue_item1.id, position: 1, rating: 1 } ]
+
+          expect(queue_item1.reload.rating).to eq 1
+        end
+
         it 'updates the position of each queue item' do
           queue_item1 = Fabricate(:queue_item, user: user)
           queue_item2 = Fabricate(:queue_item, user: user)
@@ -190,6 +211,76 @@ describe QueueItemsController do
         it 'redirects to my queue path' do
           put 'batch_update', queue_items: []
           expect(response).to redirect_to my_queue_path
+        end
+      end
+
+      context 'when some of the rating value invalid' do
+        context 'some of the rating value is not integer' do
+          it 'does not updates at all' do
+            reviews = []
+            queue_items = []
+            3.times do
+              video = Fabricate(:video)
+              reviews << Fabricate(:review, user: user, video: video, rating: 5)
+              queue_items << Fabricate(:queue_item, user: user, video: video)
+            end
+
+            put 'batch_update',
+              queue_items: [ { id: queue_items[0].id, position: 1, rating: 1.5 },
+                             { id: queue_items[1].id, position: 2, rating: 1 },
+                             { id: queue_items[2].id, position: 3, rating: 1 }
+                           ]
+
+            updated_ratings = reviews.map{ |r| r.reload.rating }
+
+            expect(updated_ratings).to eq [5,5,5]
+          end
+
+          it 'sets flash[:error]' do
+            video = Fabricate(:video)
+            Fabricate(:review, user: user, video: video, rating: 5)
+            queue_item1 = Fabricate(:queue_item, user: user, video: video)
+
+            put 'batch_update',
+              queue_items: [ { id: queue_item1.id, position: 1, rating: 1.5 } ]
+
+            expect(flash[:error]).to be_present
+          end
+        end
+
+        context 'some of the rating value is out of range'do
+          it 'does not updates' do
+            reviews = []
+            queue_items = []
+            3.times do
+              video = Fabricate(:video)
+              reviews << Fabricate(:review, user: user, video: video, rating: 5)
+              queue_items << Fabricate(:queue_item, user: user, video: video)
+            end
+
+            put 'batch_update',
+              queue_items: [ { id: queue_items[0].id, position: 1,
+                               rating: Review::RATING_RANGE[-1] + 1 },
+                             { id: queue_items[1].id, position: 2, rating: 1 },
+                             { id: queue_items[2].id, position: 3, rating: 1 }
+                           ]
+
+            updated_ratings = reviews.map{ |r| r.reload.rating }
+
+            expect(updated_ratings).to eq [5,5,5]
+          end
+
+          it 'sets flash[:error]' do
+            video = Fabricate(:video)
+            Fabricate(:review, user: user, video: video, rating: 5)
+            queue_item1 = Fabricate(:queue_item, user: user, video: video)
+
+            put 'batch_update',
+              queue_items: [ { id: queue_item1.id, position: 1,
+                               rating: Review::RATING_RANGE[-1] + 1 } ]
+
+            expect(flash[:error]).to be_present
+          end
         end
       end
 

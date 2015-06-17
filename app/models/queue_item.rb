@@ -6,8 +6,7 @@ class QueueItem < ActiveRecord::Base
   delegate :category, to: :video
 
   def rating
-    review = video.reviews.find_by(user_id: user.id)
-    review.rating if review
+    review.try(:rating)
   end
 
   def destroy_by_user(the_user)
@@ -18,6 +17,20 @@ class QueueItem < ActiveRecord::Base
     else
       false
     end
+  end
+
+  def update_rating(rating)
+    if review
+      review.update_attributes(rating: rating)
+    else
+      video.reviews
+        .build(user_id: user.id, rating: rating)
+        .save(validate: false)
+    end
+  end
+
+  def review
+    video.reviews.find_by(user_id: user.id)
   end
 
   private
@@ -57,6 +70,7 @@ class << QueueItem
           .each_with_index do |item_data, index|
             item = find(item_data[:id])
             item.update_attributes!(position: index + 1)
+            item.update_rating(item_data[:rating]) if item_data[:rating].present?
           end
       end
       true
@@ -78,10 +92,25 @@ class << QueueItem
     end
 
     def valid?
-      valid_ids? && !duplicate_positions?
+      valid_ids? && !duplicate_positions? && valid_ratings?
     end
 
     private
+
+    def valid_ratings?
+      result = true
+      params.each do |data|
+        if data[:rating].present?
+          if ( is_not_int?(data[:rating]) ||
+               !Review::RATING_RANGE.include?(data[:rating].to_i) )
+            result = false
+            break
+          end
+        end
+      end
+
+      result
+    end
 
     def is_not_int?(input)
       if input.is_a?(String)
