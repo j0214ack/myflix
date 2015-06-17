@@ -24,7 +24,7 @@
                   %td= button_to 'Play', nil, class: 'btn btn-default'
                   %td= select_tag("queue_items[][rating]",
                                   rating_chioces(queue_item.rating),
-                                  class: 'form-control',
+                                  class: 'form-group',
                                   include_blank: true)
                   %td= link_to queue_item.category.name, queue_item.category
                   %td
