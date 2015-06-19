@@ -59,8 +59,3 @@ RSpec.configure do |config|
   # https://relishapp.com/rspec/rspec-rails/v/3-0/docs
   config.infer_spec_type_from_file_location!
 end
-
-def login_user(user = nil)
-  user ||= Fabricate(:user)
-  session[:user_id] = user.id
-end

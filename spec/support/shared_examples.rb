@@ -12,3 +12,17 @@ shared_examples 'a video show page' do
     expect(assigns(:review)).to be_new_record
   end
 end
+
+shared_examples 'require user signed in' do
+  before { clear_current_user }
+
+  it 'redirects to root path' do
+    action
+    expect(response).to redirect_to root_path
+  end
+
+  it 'sets flash[:error] message' do
+    action
+    expect(flash[:error]).to be_present
+  end
+end

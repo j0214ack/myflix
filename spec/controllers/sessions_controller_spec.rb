@@ -97,15 +97,8 @@ describe SessionsController do
       end
     end
 
-    context "when user is not signed in" do
-      before(:each) { get :destroy }
-      it "redirects to root_path" do
-        expect(response).to redirect_to root_path
-      end
-
-      it "sets flash[:error]" do
-        expect(flash[:error]).to be_present
-      end
+    it_behaves_like 'require user signed in' do
+      let(:action) { get :destroy }
     end
   end
 end

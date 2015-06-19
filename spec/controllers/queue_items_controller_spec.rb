@@ -4,7 +4,7 @@ describe QueueItemsController do
   describe 'GET index' do
     context 'when user signed in,' do
       let(:user) { Fabricate(:user) }
-      before(:each) { login_user(user) }
+      before { login_user(user) }
 
       it "sets @queue_items variable to current user's queue items" do
         queue_item1 = Fabricate(:queue_item, user: user)
@@ -12,21 +12,10 @@ describe QueueItemsController do
         get 'index'
         expect(assigns(:queue_items)).to match_array([queue_item1,queue_item2])
       end
-
-      it 'renders index template' do
-        get 'index'
-        expect(response).to render_template 'index'
-      end
     end
 
-    context 'when user not signed in,' do
-      before(:each) { get 'index' }
-      it 'redirects to root path' do
-        expect(response).to redirect_to root_path
-      end
-      it 'sets flash[:error] message' do
-        expect(flash[:error]).to be_present
-      end
+    it_behaves_like 'require user signed in' do
+      let(:action) { get 'index' }
     end
   end # describe GET index
 
@@ -34,10 +23,10 @@ describe QueueItemsController do
     context 'when user signed in,' do
       let(:user) { Fabricate(:user) }
       let(:video) { Fabricate(:video) }
-      before(:each) { login_user(user) }
+      before { login_user(user) }
 
       context "when video is already in user's queue," do
-        before(:each) do
+        before do
           Fabricate(:queue_item, video: video, user: user)
           post 'create', video_id: video.id
         end
@@ -52,7 +41,7 @@ describe QueueItemsController do
       end
 
       context "when video is not in user's queue," do
-        before(:each) { post 'create', video_id: video.id }
+        before { post 'create', video_id: video.id }
         it 'creates the queue item' do
           expect(QueueItem.first).to be
         end
@@ -83,16 +72,9 @@ describe QueueItemsController do
     # For redirect_to :back funtionality in controller
     before(:each) { request.env["HTTP_REFERER"] = "http://test.host" }
 
-    context 'when user not signed in,' do
+    it_behaves_like 'require user signed in' do
       let(:queue_item) { Fabricate(:queue_item) }
-      it 'redirects to root path' do
-        delete :destroy, id: queue_item.id
-        expect(response).to redirect_to root_path
-      end
-      it 'sets flash[:error]' do
-        delete :destroy, id: queue_item.id
-        expect(flash[:error]).to be_present
-      end
+      let(:action) { delete :destroy, id: queue_item.id }
     end
 
     context 'when user signed in,' do
@@ -363,7 +345,6 @@ describe QueueItemsController do
           expect(flash[:error]).to be_present
         end
       end
-
     end # context when user signed in
   end # describe PUT batch_update
 end

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'shared_examples'
 
 describe VideosController do
   describe "GET show" do
@@ -14,11 +13,8 @@ describe VideosController do
       it_behaves_like 'a video show page'
     end
 
-    context 'when user is not signed in' do
-      it 'redirect to root path' do
-        get :show, id: video.id
-        expect(response).to redirect_to root_path
-      end
+    it_behaves_like 'require user signed in' do
+      let(:action) { get :show, id: video.id }
     end
   end
 
@@ -40,12 +36,8 @@ describe VideosController do
       end
     end
 
-    context "when user is not authenticated" do
-      it "redirects to root path" do
-        get :search, q: "South Park"
-
-        expect(response).to redirect_to root_path
-      end
+    it_behaves_like 'require user signed in' do
+      let(:action) { get :search, q: "South Park" }
     end
   end
 end

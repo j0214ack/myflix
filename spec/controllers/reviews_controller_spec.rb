@@ -1,14 +1,11 @@
 require 'spec_helper'
-require 'shared_examples'
 
 describe ReviewsController do
   describe 'POST create' do
     let(:video) { Fabricate(:video) }
     let(:user) { Fabricate(:user) }
     context 'when user signed in' do
-      before(:each) do
-        login_user(user)
-      end
+      before { login_user(user) }
 
       context 'when provided with valid information' do
         let(:info) do
@@ -66,11 +63,8 @@ describe ReviewsController do
       end
     end # context when user signed in
 
-    context 'when user not signed in' do
-      it 'redirects to root path' do
-        post :create, video_id: video.id, review: {}
-        expect(response).to redirect_to root_path
-      end
+    it_behaves_like 'require user signed in' do
+      let(:action) { post :create, video_id: video.id, review: {} }
     end
   end # describe POST create
 end
