@@ -15,6 +15,7 @@ gem 'bcrypt'
 group :development do
   gem 'thin'
   gem "binding_of_caller"
+  gem 'guard-rspec', require: false
 end
 
 group :development, :test do
