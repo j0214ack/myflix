@@ -6,6 +6,7 @@ describe Video do
   it { is_expected.to validate_presence_of :title }
   it { is_expected.to validate_presence_of :description }
   it { is_expected.to have_many :reviews }
+  it { is_expected.to have_many :queue_items }
 
   describe ".search_by_title" do
     let!(:videos) do
@@ -76,6 +77,22 @@ describe Video do
 
       expect(video.average_rating).to eq(average_rating.round(1))
     end
+  end
 
+  describe '#queue_item_of(user)' do
+    let!(:user) { Fabricate(:user) }
+    let!(:video) { Fabricate(:video) }
+    context 'the user has the video in the queue' do
+      let!(:queue_item) { Fabricate(:queue_item, video: video, user: user) }
+      it "returns the queue_item" do
+        expect(video.queue_item_of(user)).to eq queue_item
+      end
+    end
+
+    context "the user doesn't have the video in the queue" do
+      it "returns nil" do
+        expect(video.queue_item_of(user)).to be_nil
+      end
+    end
   end
 end

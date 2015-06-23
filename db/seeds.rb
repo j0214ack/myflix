@@ -17,5 +17,7 @@ videos.each do |v|
   Fabricate.times(10, :review, video: v)
 end
 
-User.create(email: "a@example.com",
-            password: "password", full_name: "Jack Chen")
+User.create(email: 'a@example.com',
+            password: 'password',
+            password_confirmation: 'password',
+            full_name: 'Jack Chen')
