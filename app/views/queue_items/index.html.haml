@@ -19,12 +19,13 @@
                 %tr
                   = hidden_field_tag("queue_items[][id]", queue_item.id)
                   %td= text_field_tag("queue_items[][position]",
-                                      queue_item.position, class: 'form-control')
+                                      queue_item.position, class: 'form-control',
+                                      id: "video_#{queue_item.video.id}")
                   %td= link_to queue_item.video.title, queue_item.video
                   %td= button_to 'Play', nil, class: 'btn btn-default'
                   %td= select_tag("queue_items[][rating]",
                                   rating_chioces(queue_item.rating),
-                                  class: 'form-group',
+                                  class: 'form-control',
                                   include_blank: true)
                   %td= link_to queue_item.category.name, queue_item.category
                   %td
