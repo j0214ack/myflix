@@ -25,6 +25,7 @@ group :development, :test do
   gem 'rspec-rails', '2.99'
   gem 'fabrication'
   gem 'faker'
+  gem 'launchy'
 end
 
 group :test do
