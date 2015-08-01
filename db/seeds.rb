@@ -6,7 +6,8 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
-categories = Fabricate.times(3, :category)
+categories = Category.create!([{ name: 'Top 10'}, { name: 'Recent'},
+  {name: 'Most viewed'}])
 
 videos = []
 18.times do
